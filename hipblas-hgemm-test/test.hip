@@ -210,6 +210,6 @@ int main () {
         // MI300X: 304 * 4 matrix cores, 512 FP16 FLOPs per cycle, 2.1 GHz
         double MI300X_Tflops = 304 * 4 * 512 * 2.1 / 1000;
         double avg_utilization = avg_Tflops / MI300X_Tflops * 100.0;
-        printf("MI300X AVG Util = %5.2lf %%\n", avg_Tflops, avg_utilization);
+        printf("MI300X AVG Util = %5.2lf %%\n", avg_utilization);
     }
 }
