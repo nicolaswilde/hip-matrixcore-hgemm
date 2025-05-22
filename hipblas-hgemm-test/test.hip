@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <float.h>
 #include <hip/hip_runtime.h>
 #include <hipblas/hipblas.h>
 #include <hip/amd_detail/amd_hip_fp16.h>
@@ -36,7 +37,7 @@
 }
 
 void cpuHgemm(
-    const half *a, const half *b, half *c, int M, int N, int K) {
+    const half *a, const half *b, float *c, int M, int N, int K) {
 
     for (int m = 0; m < M; m++) {
         for (int n = 0; n < N; n++) {
@@ -44,36 +45,38 @@ void cpuHgemm(
             for (int k = 0; k < K; k++) {
                 psum += (float)a[OFFSET(m, k, K)] * (float)b[OFFSET(n, k, K)];
             }
-            c[OFFSET(m, n, N)] = (half)psum;
+            c[OFFSET(m, n, N)] = psum;
         }
     }
 }
 
 void hipblasHgemm(hipblasHandle_t handle,
-    const half *a, const half *b, half *c, int M, int N, int K) {
+    const half *a, const half *b, float *c, int M, int N, int K) {
 
-    half alpha = 1.0;
-    half beta = 0.0;
+    float alpha = 1.0;
+    float beta = 0.0;
     checkHipblasErrors(hipblasGemmEx(
         handle, HIPBLAS_OP_T, HIPBLAS_OP_N, N, M, K,
-        &alpha, b, HIP_R_16F, K, a, HIP_R_16F, K, &beta, c, HIP_R_16F, N,
-        HIPBLAS_COMPUTE_16F, HIPBLAS_GEMM_DEFAULT));
+        &alpha, b, HIPBLAS_R_16F, K, a, HIPBLAS_R_16F, K,
+        &beta, c, HIPBLAS_R_32F, N,
+        HIPBLAS_R_32F, HIPBLAS_GEMM_DEFAULT));
 }
 
 float testHipblasHgemmMaxError(int M, int N, int K) {
 
     size_t size_a = M * K * sizeof(half);
     size_t size_b = N * K * sizeof(half);
-    size_t size_c = M * N * sizeof(half);
+    size_t size_c = M * N * sizeof(float);
 
-    half *h_a, *h_b, *h_c, *d_a, *d_b, *d_c, *h_d_c;
+    half *h_a, *h_b, *d_a, *d_b;
+    float *h_c, *d_c, *h_d_c;
     h_a = (half *)malloc(size_a);
     h_b = (half *)malloc(size_b);
-    h_c = (half *)malloc(size_c);
+    h_c = (float *)malloc(size_c);
     checkHipErrors(hipMalloc(&d_a, size_a));
     checkHipErrors(hipMalloc(&d_b, size_b));
     checkHipErrors(hipMalloc(&d_c, size_c));
-    h_d_c = (half *)malloc(size_c);
+    h_d_c = (float *)malloc(size_c);
 
     srand(time(0));
     for (int i = 0; i < M * K; i++)
@@ -92,7 +95,7 @@ float testHipblasHgemmMaxError(int M, int N, int K) {
 
     float max_error = 0.0;
     for (int i = 0; i < M * N; i++) {
-        float this_error = abs((float)h_d_c[i] - (float)h_c[i]);
+        float this_error = abs(h_d_c[i] - h_c[i]);
         if (max_error != max_error || this_error != this_error) // nan
             max_error = -NAN;
         else
@@ -113,10 +116,10 @@ float testHipblasHgemmPerformance(int M, int N, int K) {
 
     size_t size_a = M * K * sizeof(half);
     size_t size_b = K * N * sizeof(half);
-    size_t size_c = M * N * sizeof(half);
+    size_t size_c = M * N * sizeof(float);
 
     half *d_a, *d_b;
-    half *d_c;
+    float *d_c;
     checkHipErrors(hipMalloc(&d_a, size_a));
     checkHipErrors(hipMalloc(&d_b, size_b));
     checkHipErrors(hipMalloc(&d_c, size_c));
@@ -136,9 +139,7 @@ float testHipblasHgemmPerformance(int M, int N, int K) {
     checkHipErrors(hipEventCreate(&start));
     checkHipErrors(hipEventCreate(&end));
     checkHipErrors(hipEventRecord(start));
-    for (int i = 0; i < repeat; i++) {
-        hipblasHgemm(handle, d_a, d_b, d_c, M, N, K);
-    }
+    hipblasHgemm(handle, d_a, d_b, d_c, M, N, K);
     checkHipErrors(hipEventRecord(end));
     checkHipErrors(hipEventSynchronize(end));
 
@@ -177,9 +178,9 @@ int main () {
     const int test_repeat = 10;
 
     {
-        const int M = 256, N = 256, K = 256;
-        float max_error = testF16F16GemmMaxError(
-            cublasF16F16Gemm_list[i], M, N, K);
+        const int M = 128, N = 256, K = 512;
+        float max_error = testHipblasHgemmMaxError(M, N, K);
+        printf("M N K = %6d %6d %6d, ", M, N, K);
         printf("Max Error = %f\n", max_error);
     }
 
@@ -194,8 +195,8 @@ int main () {
         for (int j = 0; j < test_repeat; j++) {
             double this_sec = testHipblasHgemmPerformance(M, N, K);
             sec[j] = this_sec;
-            max_sec = max(max_sec, this_sec);
-            min_sec = min(min_sec, this_sec);
+            max_sec = max_sec > this_sec ? max_sec : this_sec;
+            min_sec = min_sec < this_sec ? min_sec : this_sec;
             total_sec += this_sec;
         }
 
@@ -204,6 +205,11 @@ int main () {
 
         printf("M N K = %6d %6d %6d, ", M, N, K);
         printf("Time = %12.8lf %12.8lf %12.8lf s, ", min_sec, avg_sec, max_sec);
-        printf("AVG Performance = %8.4lf Tflops\n", avg_Tflops);
+        printf("AVG Performance = %8.4lf Tflops, ", avg_Tflops);
+
+        // MI300X: 304 * 4 matrix cores, 512 FP16 FLOPs per cycle, 2.1 GHz
+        double MI300X_Tflops = 304 * 4 * 512 * 2.1 / 1000;
+        double avg_utilization = avg_Tflops / MI300X_Tflops * 100.0;
+        printf("MI300X AVG Util = %5.2lf %%\n", avg_Tflops, avg_utilization);
     }
 }
