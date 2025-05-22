@@ -1,5 +1,6 @@
 #include "global.h"
-#include "hgemm_128x128_32x64_swz.h"
+#include "hgemm_128x128.h"
+#include "hgemm_256x256.h"
 
 #define checkHipErrors(func)                                                    \
 {                                                                               \
@@ -25,7 +26,9 @@ void cpuHgemm(
 void myselfHgemm(
     const half *a, const half *b, float *c, int M, int N, int K) {
 
-    hgemm_128x128_32x64_swz<<<dim3(M / 128, N / 128), dim3(64, 8)>>>(a, b, c, M, N, K);
+    // hgemm_128x128x64_32x64_16x16_swz<<<dim3(M / 128, N / 128), dim3(64, 8)>>>(a, b, c, M, N, K);
+    // hgemm_128x128x64_32x64_32x32_swz<<<dim3(M / 128, N / 128), dim3(64, 8)>>>(a, b, c, M, N, K);
+    hgemm_256x256x64_64x64_32x32_swz<<<dim3(M / 256, N / 256), dim3(64, 8)>>>(a, b, c, M, N, K);
 }
 
 float testMyselfHgemmMaxError(int M, int N, int K) {
@@ -137,7 +140,7 @@ int main () {
     const int test_repeat = 10;
 
     {
-        const int M = 128, N = 256, K = 512;
+        const int M = 512, N = 1024, K = 256;
         float max_error = testMyselfHgemmMaxError(M, N, K);
         printf("M N K = %6d %6d %6d, ", M, N, K);
         printf("Max Error = %f\n", max_error);
