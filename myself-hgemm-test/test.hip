@@ -28,7 +28,7 @@ void myselfHgemm(
 
     // hgemm_128x128x64_32x64_16x16_swz<<<dim3(M / 128, N / 128), dim3(64, 8)>>>(a, b, c, M, N, K);
     // hgemm_128x128x64_32x64_32x32_swz<<<dim3(M / 128, N / 128), dim3(64, 8)>>>(a, b, c, M, N, K);
-    hgemm_256x256x64_64x64_32x32_swz<<<dim3(M / 256, N / 256), dim3(64, 8)>>>(a, b, c, M, N, K);
+    hgemm_256x256x64_64x128_32x32_swz<<<dim3(M / 256, N / 256), dim3(64, 8)>>>(a, b, c, M, N, K);
 }
 
 float testMyselfHgemmMaxError(int M, int N, int K) {
