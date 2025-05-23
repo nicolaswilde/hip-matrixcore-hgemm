@@ -45,10 +45,10 @@ __global__ void hgemm_128x128x64_32x64_16x16_swz(
         }
 
         for (int ii = 0; ii < 2; ii++) {
-            *(long *)&s_a[sts_mn + ii*64][SWZ(sts_mn, sts_k    )] = *(long *)&ldg_a[ii][0];
-            *(long *)&s_a[sts_mn + ii*64][SWZ(sts_mn, sts_k + 4)] = *(long *)&ldg_a[ii][4];
-            *(long *)&s_b[sts_mn + ii*64][SWZ(sts_mn, sts_k    )] = *(long *)&ldg_b[ii][0];
-            *(long *)&s_b[sts_mn + ii*64][SWZ(sts_mn, sts_k + 4)] = *(long *)&ldg_b[ii][4];
+            *(half4 *)&s_a[sts_mn + ii*64][SWZ(sts_mn, sts_k    )] = *(half4 *)&ldg_a[ii][0];
+            *(half4 *)&s_a[sts_mn + ii*64][SWZ(sts_mn, sts_k + 4)] = *(half4 *)&ldg_a[ii][4];
+            *(half4 *)&s_b[sts_mn + ii*64][SWZ(sts_mn, sts_k    )] = *(half4 *)&ldg_b[ii][0];
+            *(half4 *)&s_b[sts_mn + ii*64][SWZ(sts_mn, sts_k + 4)] = *(half4 *)&ldg_b[ii][4];
         }
 
         __syncthreads();
@@ -56,12 +56,12 @@ __global__ void hgemm_128x128x64_32x64_16x16_swz(
         half4 tile_a[2][4], tile_b[4][4];
         for (int ii = 0; ii < 2; ii++) {
             for (int kk = 0; kk < 4; kk++) {
-                tile_a[ii][kk] = *(long *)&s_a[lds_m + ii*16][SWZ(lds_n, lds_k + kk*16)];
+                tile_a[ii][kk] = *(half4 *)&s_a[lds_m + ii*16][SWZ(lds_n, lds_k + kk*16)];
             }
         }
         for (int ii = 0; ii < 4; ii++) {
             for (int kk = 0; kk < 4; kk++) {
-                tile_b[ii][kk] = *(long *)&s_b[lds_n + ii*16][SWZ(lds_m, lds_k + kk*16)];
+                tile_b[ii][kk] = *(half4 *)&s_b[lds_n + ii*16][SWZ(lds_m, lds_k + kk*16)];
             }
         }
         for (int ii = 0; ii < 2; ii++) {
@@ -130,10 +130,10 @@ __global__ void hgemm_128x128x64_32x64_32x32_swz(
         }
 
         for (int ii = 0; ii < 2; ii++) {
-            *(long *)&s_a[sts_mn + ii*64][SWZ(sts_mn, sts_k    )] = *(long *)&ldg_a[ii][0];
-            *(long *)&s_a[sts_mn + ii*64][SWZ(sts_mn, sts_k + 4)] = *(long *)&ldg_a[ii][4];
-            *(long *)&s_b[sts_mn + ii*64][SWZ(sts_mn, sts_k    )] = *(long *)&ldg_b[ii][0];
-            *(long *)&s_b[sts_mn + ii*64][SWZ(sts_mn, sts_k + 4)] = *(long *)&ldg_b[ii][4];
+            *(half4 *)&s_a[sts_mn + ii*64][SWZ(sts_mn, sts_k    )] = *(half4 *)&ldg_a[ii][0];
+            *(half4 *)&s_a[sts_mn + ii*64][SWZ(sts_mn, sts_k + 4)] = *(half4 *)&ldg_a[ii][4];
+            *(half4 *)&s_b[sts_mn + ii*64][SWZ(sts_mn, sts_k    )] = *(half4 *)&ldg_b[ii][0];
+            *(half4 *)&s_b[sts_mn + ii*64][SWZ(sts_mn, sts_k + 4)] = *(half4 *)&ldg_b[ii][4];
         }
 
         __syncthreads();
@@ -141,12 +141,12 @@ __global__ void hgemm_128x128x64_32x64_32x32_swz(
         half4 tile_a[1][8], tile_b[2][8];
         for (int ii = 0; ii < 1; ii++) {
             for (int kk = 0; kk < 8; kk++) {
-                tile_a[ii][kk] = *(long *)&s_a[lds_m + ii*32][SWZ(lds_n, lds_k + kk*8)];
+                tile_a[ii][kk] = *(half4 *)&s_a[lds_m + ii*32][SWZ(lds_n, lds_k + kk*8)];
             }
         }
         for (int ii = 0; ii < 2; ii++) {
             for (int kk = 0; kk < 8; kk++) {
-                tile_b[ii][kk] = *(long *)&s_b[lds_n + ii*32][SWZ(lds_m, lds_k + kk*8)];
+                tile_b[ii][kk] = *(half4 *)&s_b[lds_n + ii*32][SWZ(lds_m, lds_k + kk*8)];
             }
         }
         for (int ii = 0; ii < 1; ii++) {
@@ -217,10 +217,10 @@ __global__ void hgemm_128x128x64_64x64_32x32_swz(
         }
 
         for (int ii = 0; ii < 4; ii++) {
-            *(long *)&s_a[sts_mn + ii*32][SWZ(sts_mn, sts_k    )] = *(long *)&ldg_a[ii][0];
-            *(long *)&s_a[sts_mn + ii*32][SWZ(sts_mn, sts_k + 4)] = *(long *)&ldg_a[ii][4];
-            *(long *)&s_b[sts_mn + ii*32][SWZ(sts_mn, sts_k    )] = *(long *)&ldg_b[ii][0];
-            *(long *)&s_b[sts_mn + ii*32][SWZ(sts_mn, sts_k + 4)] = *(long *)&ldg_b[ii][4];
+            *(half4 *)&s_a[sts_mn + ii*32][SWZ(sts_mn, sts_k    )] = *(half4 *)&ldg_a[ii][0];
+            *(half4 *)&s_a[sts_mn + ii*32][SWZ(sts_mn, sts_k + 4)] = *(half4 *)&ldg_a[ii][4];
+            *(half4 *)&s_b[sts_mn + ii*32][SWZ(sts_mn, sts_k    )] = *(half4 *)&ldg_b[ii][0];
+            *(half4 *)&s_b[sts_mn + ii*32][SWZ(sts_mn, sts_k + 4)] = *(half4 *)&ldg_b[ii][4];
         }
 
         __syncthreads();
@@ -228,12 +228,12 @@ __global__ void hgemm_128x128x64_64x64_32x32_swz(
         half4 tile_a[2][8], tile_b[2][8];
         for (int ii = 0; ii < 2; ii++) {
             for (int kk = 0; kk < 8; kk++) {
-                tile_a[ii][kk] = *(long *)&s_a[lds_m + ii*32][SWZ(lds_n, lds_k + kk*8)];
+                tile_a[ii][kk] = *(half4 *)&s_a[lds_m + ii*32][SWZ(lds_n, lds_k + kk*8)];
             }
         }
         for (int ii = 0; ii < 2; ii++) {
             for (int kk = 0; kk < 8; kk++) {
-                tile_b[ii][kk] = *(long *)&s_b[lds_n + ii*32][SWZ(lds_m, lds_k + kk*8)];
+                tile_b[ii][kk] = *(half4 *)&s_b[lds_n + ii*32][SWZ(lds_m, lds_k + kk*8)];
             }
         }
         for (int ii = 0; ii < 2; ii++) {
@@ -309,13 +309,13 @@ __global__ void hgemm_BMxBNxBK_WMxWN_32x32_swz(
         }
 
         for (int ii = 0; ii < BM/ldgsts_rows; ii++) {
-            *(long *)&s_a[sts_mn + ii*ldgsts_rows][SWZ(sts_mn, sts_k    )] = *(long *)&ldg_a[ii][0];
-            *(long *)&s_a[sts_mn + ii*ldgsts_rows][SWZ(sts_mn, sts_k + 4)] = *(long *)&ldg_a[ii][4];
+            *(half4 *)&s_a[sts_mn + ii*ldgsts_rows][SWZ(sts_mn, sts_k    )] = *(half4 *)&ldg_a[ii][0];
+            *(half4 *)&s_a[sts_mn + ii*ldgsts_rows][SWZ(sts_mn, sts_k + 4)] = *(half4 *)&ldg_a[ii][4];
         }
 
         for (int ii = 0; ii < BN/ldgsts_rows; ii++) {
-            *(long *)&s_b[sts_mn + ii*ldgsts_rows][SWZ(sts_mn, sts_k    )] = *(long *)&ldg_b[ii][0];
-            *(long *)&s_b[sts_mn + ii*ldgsts_rows][SWZ(sts_mn, sts_k + 4)] = *(long *)&ldg_b[ii][4];
+            *(half4 *)&s_b[sts_mn + ii*ldgsts_rows][SWZ(sts_mn, sts_k    )] = *(half4 *)&ldg_b[ii][0];
+            *(half4 *)&s_b[sts_mn + ii*ldgsts_rows][SWZ(sts_mn, sts_k + 4)] = *(half4 *)&ldg_b[ii][4];
         }
 
         __syncthreads();
@@ -323,12 +323,12 @@ __global__ void hgemm_BMxBNxBK_WMxWN_32x32_swz(
         half4 tile_a[WM/32][8], tile_b[WN/32][8];
         for (int ii = 0; ii < WM/32; ii++) {
             for (int kk = 0; kk < 8; kk++) {
-                tile_a[ii][kk] = *(long *)&s_a[lds_m + ii*32][SWZ(lds_n, lds_k + kk*8)];
+                tile_a[ii][kk] = *(half4 *)&s_a[lds_m + ii*32][SWZ(lds_n, lds_k + kk*8)];
             }
         }
         for (int ii = 0; ii < WN/32; ii++) {
             for (int kk = 0; kk < 8; kk++) {
-                tile_b[ii][kk] = *(long *)&s_b[lds_n + ii*32][SWZ(lds_m, lds_k + kk*8)];
+                tile_b[ii][kk] = *(half4 *)&s_b[lds_n + ii*32][SWZ(lds_m, lds_k + kk*8)];
             }
         }
         for (int ii = 0; ii < WN/32; ii++) {
@@ -399,10 +399,10 @@ __global__ void hgemm_128x128x32_64x64_32x32_swz(
         }
 
         for (int ii = 0; ii < 2; ii++) {
-            *(long *)&s_a[sts_mn + ii*64][SWZ(sts_mn, sts_k    )] = *(long *)&ldg_a[ii][0];
-            *(long *)&s_a[sts_mn + ii*64][SWZ(sts_mn, sts_k + 4)] = *(long *)&ldg_a[ii][4];
-            *(long *)&s_b[sts_mn + ii*64][SWZ(sts_mn, sts_k    )] = *(long *)&ldg_b[ii][0];
-            *(long *)&s_b[sts_mn + ii*64][SWZ(sts_mn, sts_k + 4)] = *(long *)&ldg_b[ii][4];
+            *(half4 *)&s_a[sts_mn + ii*64][SWZ(sts_mn, sts_k    )] = *(half4 *)&ldg_a[ii][0];
+            *(half4 *)&s_a[sts_mn + ii*64][SWZ(sts_mn, sts_k + 4)] = *(half4 *)&ldg_a[ii][4];
+            *(half4 *)&s_b[sts_mn + ii*64][SWZ(sts_mn, sts_k    )] = *(half4 *)&ldg_b[ii][0];
+            *(half4 *)&s_b[sts_mn + ii*64][SWZ(sts_mn, sts_k + 4)] = *(half4 *)&ldg_b[ii][4];
         }
 
         __syncthreads();
@@ -410,12 +410,12 @@ __global__ void hgemm_128x128x32_64x64_32x32_swz(
         half4 tile_a[2][4], tile_b[2][4];
         for (int ii = 0; ii < 2; ii++) {
             for (int kk = 0; kk < 4; kk++) {
-                tile_a[ii][kk] = *(long *)&s_a[lds_m + ii*32][SWZ(lds_n, lds_k + kk*8)];
+                tile_a[ii][kk] = *(half4 *)&s_a[lds_m + ii*32][SWZ(lds_n, lds_k + kk*8)];
             }
         }
         for (int ii = 0; ii < 2; ii++) {
             for (int kk = 0; kk < 4; kk++) {
-                tile_b[ii][kk] = *(long *)&s_b[lds_n + ii*32][SWZ(lds_m, lds_k + kk*8)];
+                tile_b[ii][kk] = *(half4 *)&s_b[lds_n + ii*32][SWZ(lds_m, lds_k + kk*8)];
             }
         }
         for (int ii = 0; ii < 2; ii++) {

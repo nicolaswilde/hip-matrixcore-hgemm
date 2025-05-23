@@ -85,13 +85,13 @@ __global__ void hgemm_swz(const half *a, const half *b, float *c, int M, int N, 
         }
 
         for (int ii = 0; ii < BM/RPT; ii++) {
-            *(long *)&s_a[sts_mn + ii*RPT][swz<abtype, BK>(sts_mn + ii*RPT, sts_k    )] = *(long *)&ldg_a[ii][0];
-            *(long *)&s_a[sts_mn + ii*RPT][swz<abtype, BK>(sts_mn + ii*RPT, sts_k + 4)] = *(long *)&ldg_a[ii][4];
+            *(myhalf4 *)&s_a[sts_mn + ii*RPT][swz<abtype, BK>(sts_mn + ii*RPT, sts_k    )] = *(long *)&ldg_a[ii][0];
+            *(myhalf4 *)&s_a[sts_mn + ii*RPT][swz<abtype, BK>(sts_mn + ii*RPT, sts_k + 4)] = *(long *)&ldg_a[ii][4];
         }
 
         for (int ii = 0; ii < BN/RPT; ii++) {
-            *(long *)&s_b[sts_mn + ii*RPT][swz<abtype, BK>(sts_mn + ii*RPT, sts_k    )] = *(long *)&ldg_b[ii][0];
-            *(long *)&s_b[sts_mn + ii*RPT][swz<abtype, BK>(sts_mn + ii*RPT, sts_k + 4)] = *(long *)&ldg_b[ii][4];
+            *(myhalf4 *)&s_b[sts_mn + ii*RPT][swz<abtype, BK>(sts_mn + ii*RPT, sts_k    )] = *(long *)&ldg_b[ii][0];
+            *(myhalf4 *)&s_b[sts_mn + ii*RPT][swz<abtype, BK>(sts_mn + ii*RPT, sts_k + 4)] = *(long *)&ldg_b[ii][4];
         }
 
         __syncthreads();
@@ -99,12 +99,12 @@ __global__ void hgemm_swz(const half *a, const half *b, float *c, int M, int N, 
         myhalf4 tile_a[WM/IM][BK/IK], tile_b[WN/IN][BK/IK];
         for (int ii = 0; ii < WM/IM; ii++) {
             for (int kk = 0; kk < BK/IK; kk++) {
-                tile_a[ii][kk] = *(long *)&s_a[lds_m + ii*IM][swz<abtype, BK>(lds_m + ii*IM, lds_k + kk*(16/sizeof(half)))];
+                tile_a[ii][kk] = *(myhalf4 *)&s_a[lds_m + ii*IM][swz<abtype, BK>(lds_m + ii*IM, lds_k + kk*(16/sizeof(half)))];
             }
         }
         for (int ii = 0; ii < WN/IN; ii++) {
             for (int kk = 0; kk < BK/IK; kk++) {
-                tile_b[ii][kk] = *(long *)&s_b[lds_n + ii*IN][swz<abtype, BK>(lds_n + ii*IN, lds_k + kk*(16/sizeof(half)))];
+                tile_b[ii][kk] = *(myhalf4 *)&s_b[lds_n + ii*IN][swz<abtype, BK>(lds_n + ii*IN, lds_k + kk*(16/sizeof(half)))];
             }
         }
         for (int ii = 0; ii < WM/IM; ii++) {

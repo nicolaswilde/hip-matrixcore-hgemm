@@ -46,10 +46,10 @@ __global__ void hgemm_256x256x64_64x128_32x32_swz(
         }
 
         for (int ii = 0; ii < 4; ii++) {
-            *(long *)&s_a[sts_mn + ii*64][SWZ(sts_mn, sts_k    )] = *(long *)&ldg_a[ii][0];
-            *(long *)&s_a[sts_mn + ii*64][SWZ(sts_mn, sts_k + 4)] = *(long *)&ldg_a[ii][4];
-            *(long *)&s_b[sts_mn + ii*64][SWZ(sts_mn, sts_k    )] = *(long *)&ldg_b[ii][0];
-            *(long *)&s_b[sts_mn + ii*64][SWZ(sts_mn, sts_k + 4)] = *(long *)&ldg_b[ii][4];
+            *(half4 *)&s_a[sts_mn + ii*64][SWZ(sts_mn, sts_k    )] = *(half4 *)&ldg_a[ii][0];
+            *(half4 *)&s_a[sts_mn + ii*64][SWZ(sts_mn, sts_k + 4)] = *(half4 *)&ldg_a[ii][4];
+            *(half4 *)&s_b[sts_mn + ii*64][SWZ(sts_mn, sts_k    )] = *(half4 *)&ldg_b[ii][0];
+            *(half4 *)&s_b[sts_mn + ii*64][SWZ(sts_mn, sts_k + 4)] = *(half4 *)&ldg_b[ii][4];
         }
 
         __syncthreads();
@@ -57,12 +57,12 @@ __global__ void hgemm_256x256x64_64x128_32x32_swz(
         half4 tile_a[2][8], tile_b[4][8];
         for (int ii = 0; ii < 2; ii++) {
             for (int kk = 0; kk < 8; kk++) {
-                tile_a[ii][kk] = *(long *)&s_a[lds_m + ii*32][SWZ(lds_n, lds_k + kk*8)];
+                tile_a[ii][kk] = *(half4 *)&s_a[lds_m + ii*32][SWZ(lds_n, lds_k + kk*8)];
             }
         }
         for (int ii = 0; ii < 4; ii++) {
             for (int kk = 0; kk < 8; kk++) {
-                tile_b[ii][kk] = *(long *)&s_b[lds_n + ii*32][SWZ(lds_m, lds_k + kk*8)];
+                tile_b[ii][kk] = *(half4 *)&s_b[lds_n + ii*32][SWZ(lds_m, lds_k + kk*8)];
             }
         }
         for (int ii = 0; ii < 2; ii++) {
