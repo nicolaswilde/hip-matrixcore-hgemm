@@ -21,7 +21,7 @@ void hgemm_swz_wrapper(
 
     const int TPB = BM * BN / WM / WN * 64;
     dim3 grid((M + BM - 1) / BM, (N + BN - 1) / BN);
-    dim3 block(WM, WN);
+    dim3 block(64, BM * BN / WM / WN);
     hgemm_swz<BM, BN, BK, WM, WN, inst, TPB><<<grid, block>>>(a, b, c, M, N, K);
 }
 
