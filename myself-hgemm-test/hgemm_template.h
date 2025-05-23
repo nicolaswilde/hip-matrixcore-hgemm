@@ -1,7 +1,31 @@
 #include "global.h"
 
 
-template<const int BM, const int BN, const int BK, const int WM, const int WN, mfma_t inst, const int TPB>
+template<int BM, int BN, int BK, int WM, int WN, mfma_t inst>
+// thread block tiling: BM, BN, BK
+// warp tiling: WM, WN
+// instruction: MFMA_32x32x8_F16 or MFMA_16x16x16_F16
+void hgemm_swz_wrapper(const half *a, const half *b, float *c, int M, int N, int K);
+
+template<int BM, int BN, int BK, int WM, int WN, mfma_t inst, int TPB>
+// thread block tiling: BM, BN, BK
+// warp tiling: WM, WN
+// instruction: MFMA_32x32x8_F16 or MFMA_16x16x16_F16
+// threads per block: TPB
+__launch_bounds__(TPB, LDSSIZE / ((BM + BN) * BK * sizeof(half)))
+__global__ void hgemm_swz(const half *a, const half *b, float *c, int M, int N, int K);
+
+template<int BM, int BN, int BK, int WM, int WN, mfma_t inst>
+void hgemm_swz_wrapper(
+    const half *a, const half *b, float *c, int M, int N, int K) {
+
+    const int TPB = BM * BN / WM / WN * 64;
+    dim3 grid((M + BM - 1) / BM, (N + BN - 1) / BN);
+    dim3 block(WM, WN);
+    hgemm_swz<BM, BN, BK, WM, WN, inst, TPB><<<grid, block>>>(a, b, c, M, N, K);
+}
+
+template<int BM, int BN, int BK, int WM, int WN, mfma_t inst, int TPB>
 // thread block tiling: BM, BN, BK
 // warp tiling: WM, WN
 // instruction: MFMA_32x32x8_F16 or MFMA_16x16x16_F16
@@ -9,7 +33,7 @@ template<const int BM, const int BN, const int BK, const int WM, const int WN, m
 __launch_bounds__(TPB, LDSSIZE / ((BM + BN) * BK * sizeof(half)))
 __global__ void hgemm_swz(const half *a, const half *b, float *c, int M, int N, int K) {
 
-    using SWZ = swz<half, BK>;
+    using abtype = half;
     using dtype = typename dtype_selector<inst>::type;
 
     // instruction tiling
@@ -61,13 +85,13 @@ __global__ void hgemm_swz(const half *a, const half *b, float *c, int M, int N, 
         }
 
         for (int ii = 0; ii < BM/RPT; ii++) {
-            *(long *)&s_a[sts_mn + ii*RPT][SWZ(sts_mn, sts_k    )] = *(long *)&ldg_a[ii][0];
-            *(long *)&s_a[sts_mn + ii*RPT][SWZ(sts_mn, sts_k + 4)] = *(long *)&ldg_a[ii][4];
+            *(long *)&s_a[sts_mn + ii*RPT][swz<abtype, BK>(sts_mn + ii*RPT, sts_k    )] = *(long *)&ldg_a[ii][0];
+            *(long *)&s_a[sts_mn + ii*RPT][swz<abtype, BK>(sts_mn + ii*RPT, sts_k + 4)] = *(long *)&ldg_a[ii][4];
         }
 
         for (int ii = 0; ii < BN/RPT; ii++) {
-            *(long *)&s_b[sts_mn + ii*RPT][SWZ(sts_mn, sts_k    )] = *(long *)&ldg_b[ii][0];
-            *(long *)&s_b[sts_mn + ii*RPT][SWZ(sts_mn, sts_k + 4)] = *(long *)&ldg_b[ii][4];
+            *(long *)&s_b[sts_mn + ii*RPT][swz<abtype, BK>(sts_mn + ii*RPT, sts_k    )] = *(long *)&ldg_b[ii][0];
+            *(long *)&s_b[sts_mn + ii*RPT][swz<abtype, BK>(sts_mn + ii*RPT, sts_k + 4)] = *(long *)&ldg_b[ii][4];
         }
 
         __syncthreads();
@@ -75,12 +99,12 @@ __global__ void hgemm_swz(const half *a, const half *b, float *c, int M, int N, 
         myhalf4 tile_a[WM/IM][BK/IK], tile_b[WN/IN][BK/IK];
         for (int ii = 0; ii < WM/IM; ii++) {
             for (int kk = 0; kk < BK/IK; kk++) {
-                tile_a[ii][kk] = *(long *)&s_a[lds_m + ii*IM][SWZ(lds_n, lds_k + kk*(16/sizeof(half)))];
+                tile_a[ii][kk] = *(long *)&s_a[lds_m + ii*IM][swz<abtype, BK>(lds_m + ii*IM, lds_k + kk*(16/sizeof(half)))];
             }
         }
         for (int ii = 0; ii < WN/IN; ii++) {
             for (int kk = 0; kk < BK/IK; kk++) {
-                tile_b[ii][kk] = *(long *)&s_b[lds_n + ii*IN][SWZ(lds_m, lds_k + kk*(16/sizeof(half)))];
+                tile_b[ii][kk] = *(long *)&s_b[lds_n + ii*IN][swz<abtype, BK>(lds_n + ii*IN, lds_k + kk*(16/sizeof(half)))];
             }
         }
         for (int ii = 0; ii < WM/IM; ii++) {
