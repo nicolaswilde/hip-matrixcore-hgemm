@@ -9,6 +9,7 @@ template<const int BM, const int BN, const int BK, const int WM, const int WN, m
 __launch_bounds__(TPB, LDSSIZE / ((BM + BN) * BK * sizeof(half)))
 __global__ void hgemm_swz(const half *a, const half *b, float *c, int M, int N, int K) {
 
+    using SWZ = swz<half, BK>;
     using dtype = typename dtype_selector<inst>::type;
 
     // instruction tiling

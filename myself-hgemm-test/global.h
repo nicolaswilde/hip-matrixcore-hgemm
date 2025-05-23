@@ -34,6 +34,15 @@ template<> struct mfma_selector<MFMA_16x16x16_F16> {
     }
 };
 
+template<typename T, int BK>
+__device__ __forceinline__ int swz(int m, int n) {
+    static constexpr int swizzle_elements = 8 / sizeof(T);
+    static constexpr int shared_memory_row_elements = 128 / sizeof(T);
+    static constexpr int swizzle_per_n_matrix_rows =
+        BK >= shared_memory_row_elements ? 1 : (shared_memory_row_elements / BK);
+    return (m / swizzle_per_n_matrix_rows * swizzle_elements + n) % shared_memory_row_elements;
+}
+
 template<mfma_t inst> struct dtype_selector;
 template<> struct dtype_selector<MFMA_32x32x8_F16 > { using type = myfloat16; };
 template<> struct dtype_selector<MFMA_16x16x16_F16> { using type = myfloat4 ; };

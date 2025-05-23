@@ -1,6 +1,7 @@
 #include "global.h"
 #include "hgemm_128x128.h"
 #include "hgemm_256x256.h"
+#include "hgemm_template.h"
 
 #define checkHipErrors(func)                                                    \
 {                                                                               \
