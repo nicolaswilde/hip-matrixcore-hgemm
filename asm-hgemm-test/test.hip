@@ -1,5 +1,6 @@
 #include "global.h"
 #include "hgemm_128x128x64_64x64.h"
+#include "hgemm_128x128x32_64x64.h"
 
 void cpuHgemm(
     const half *a, const half *b, float *c, int M, int N, int K) {
@@ -20,7 +21,9 @@ void myselfHgemm(
 
     // hgemm_128x128x64_64x64_32x32_naive<<<dim3(M / 128, N / 128), dim3(64, 4)>>>(a, b, c, M, N, K);
     // hgemm_128x128x64_64x64_32x32_asm_naive<<<dim3(M / 128, N / 128), dim3(64, 4)>>>(a, b, c, M, N, K);
-    hgemm_128x128x64_64x64_32x32_asm<<<dim3(M / 128, N / 128), dim3(64, 4)>>>(a, b, c, M, N, K);
+    // hgemm_128x128x64_64x64_32x32_asm<<<dim3(M / 128, N / 128), dim3(64, 4)>>>(a, b, c, M, N, K);
+
+    hgemm_128x128x32_64x64_32x32_naive<<<dim3(M / 128, N / 128), dim3(64, 4)>>>(a, b, c, M, N, K);
 }
 
 float testMyselfHgemmMaxError(int M, int N, int K) {

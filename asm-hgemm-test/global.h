@@ -10,6 +10,7 @@
 #define OFFSET(row, col, ld) ((row) * (ld) + (col))
 
 #define SWZ(m, n) (((m) * 4 + (n)) % 64) // by half
+#define SWZ_32(m, n) (((m) / 2 * 4 + (n)) % 64) // by half
 
 #define checkHipErrors(func)                                                    \
 {                                                                               \
