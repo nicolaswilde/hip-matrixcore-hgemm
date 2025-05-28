@@ -11,8 +11,8 @@ __global__ void hgemm_128x128x32_64x64_32x32_naive(
         half4 y;
     } half4x2;
 
-    __shared__ half s_a[128][64];
-    __shared__ half s_b[128][64];
+    __shared__ half s_a[128][32];
+    __shared__ half s_b[128][32];
 
     int thread_block_m = blockIdx.x * 128;
     int thread_block_n = blockIdx.y * 128;
