@@ -41,11 +41,11 @@ __global__ void hgemm_128x128x32_64x64_32x32_naive(
 
     float16 tile_d[2][2] = {0};
 
-    for (int ib = 0; ib < K/64; ib++) {
+    for (int ib = 0; ib < K/32; ib++) {
         half4x2 ldg_a[2], ldg_b[2];
         for (int ii = 0; ii < 2; ii++) {
-            ldg_a[ii] = *(half4x2 *)&a[OFFSET(ldg_m + ii*64, ldg_k + ib*64, K)];
-            ldg_b[ii] = *(half4x2 *)&b[OFFSET(ldg_n + ii*64, ldg_k + ib*64, K)];
+            ldg_a[ii] = *(half4x2 *)&a[OFFSET(ldg_m + ii*64, ldg_k + ib*32, K)];
+            ldg_b[ii] = *(half4x2 *)&b[OFFSET(ldg_n + ii*64, ldg_k + ib*32, K)];
         }
 
         for (int ii = 0; ii < 2; ii++) {
