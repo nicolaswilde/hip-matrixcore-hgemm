@@ -32,8 +32,9 @@ void myselfHgemm(
     // hgemm_128x128x64_64x64_32x32_swz<<<dim3(M / 128, N / 128), dim3(64, 4)>>>(a, b, c, M, N, K);
     // hgemm_128x128x32_64x64_32x32_swz<<<dim3(M / 128, N / 128), dim3(64, 4)>>>(a, b, c, M, N, K);
     // hgemm_256x256x64_64x128_32x32_swz<<<dim3(M / 256, N / 256), dim3(64, 8)>>>(a, b, c, M, N, K);
+    hgemm_256x256x64_64x128_32x32_swz_db<<<dim3(M / 256, N / 256), dim3(64, 8)>>>(a, b, c, M, N, K);
 
-    hgemm_swz_wrapper<128, 128, 128, 64, 64, MFMA_32x32x8_F16>(a, b, c, M, N, K);
+    // hgemm_swz_wrapper<128, 128, 128, 64, 64, MFMA_32x32x8_F16>(a, b, c, M, N, K);
 }
 
 float testMyselfHgemmMaxError(int M, int N, int K) {
@@ -132,13 +133,13 @@ int main () {
     const int K_list[test_num] = {128, 256, 512, 1024, 2048, 4096, 8192, 16384};
     */
 
-    const int test_num = 32;
+    const int test_num = 64;
     int M_list[test_num];
     int N_list[test_num];
     int K_list[test_num];
     for (int i = 0; i < test_num; i++) {
-        M_list[i] = (i + 1) * 256;
-        N_list[i] = (i + 1) * 256;
+        M_list[i] = 4096; // MI300X 304 CU
+        N_list[i] = 4864; // MI300X 304 CU
         K_list[i] = (i + 1) * 256;
     }
 

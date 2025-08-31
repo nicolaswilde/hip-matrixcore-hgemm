@@ -170,8 +170,8 @@ int main () {
     int N_list[test_num];
     int K_list[test_num];
     for (int i = 0; i < test_num; i++) {
-        M_list[i] = (i + 1) * 256;
-        N_list[i] = (i + 1) * 256;
+        M_list[i] = 4096; // MI300X 304 CU
+        N_list[i] = 4864; // MI300X 304 CU
         K_list[i] = (i + 1) * 256;
     }
 
