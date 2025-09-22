@@ -59,7 +59,7 @@ void hipblasHgemm(hipblasHandle_t handle,
         handle, HIPBLAS_OP_T, HIPBLAS_OP_N, N, M, K,
         &alpha, b, HIPBLAS_R_16F, K, a, HIPBLAS_R_16F, K,
         &beta, c, HIPBLAS_R_32F, N,
-        HIPBLAS_R_32F, HIPBLAS_GEMM_DEFAULT));
+        HIPBLAS_COMPUTE_32F, HIPBLAS_GEMM_DEFAULT));
 }
 
 float testHipblasHgemmMaxError(int M, int N, int K) {

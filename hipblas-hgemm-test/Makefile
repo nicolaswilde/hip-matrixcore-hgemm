@@ -1,7 +1,7 @@
 default: compile run
 
 compile:
-	/opt/rocm-6.4.1/bin/hipcc --offload-arch=gfx942 -std=c++20 -O3 -L/opt/rocm-6.4.1/lib -lhipblas  test.hip -o test
+	/opt/rocm-7.0.0/bin/hipcc --offload-arch=gfx942 -std=c++20 -O3 -L/opt/rocm-7.0.0/lib -lhipblas  test.hip -o test
 
 run:
 	./test
