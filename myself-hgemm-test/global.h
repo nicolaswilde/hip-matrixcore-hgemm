@@ -9,6 +9,7 @@
 
 #define OFFSET(row, col, ld) ((row) * (ld) + (col))
 #define SWZ(m, n) (((m) * 4 + (n)) % 64) // by half
+#define SWZ32(m, n) (((m) * 4 + (n)) % 32) // by half
 
 #define TPW 64 // threads per warp
 #define LDSSIZE (64*1024) // 64KB in MI300X

@@ -33,6 +33,8 @@ void myselfHgemm(
     // hgemm_128x128x32_64x64_32x32_swz<<<dim3(M / 128, N / 128), dim3(64, 4)>>>(a, b, c, M, N, K);
     // hgemm_256x256x64_64x128_32x32_swz<<<dim3(M / 256, N / 256), dim3(64, 8)>>>(a, b, c, M, N, K);
     hgemm_256x256x64_64x128_32x32_swz_db<<<dim3(M / 256, N / 256), dim3(64, 8)>>>(a, b, c, M, N, K);
+    // hgemm_256x256x32_64x128_32x32_swz_2stage<<<dim3(M / 256, N / 256), dim3(64, 8)>>>(a, b, c, M, N, K); // not better than 256x256x64
+    // hgemm_256x256x32_64x128_32x32_swz_3stage<<<dim3(M / 256, N / 256), dim3(64, 8)>>>(a, b, c, M, N, K); // worst...
 
     // hgemm_swz_wrapper<128, 128, 128, 64, 64, MFMA_32x32x8_F16>(a, b, c, M, N, K);
 }
