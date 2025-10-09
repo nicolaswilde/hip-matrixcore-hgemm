@@ -1,6 +1,7 @@
 #include "global.h"
 #include "hgemm_128x128.h"
 #include "hgemm_128x256.h"
+#include "hgemm_256x128.h"
 #include "hgemm_256x256.h"
 #include "hgemm_template.h"
 
@@ -34,6 +35,7 @@ void myselfHgemm(
     // hgemm_128x128x32_64x64_32x32_swz<<<dim3(M / 128, N / 128), dim3(64, 4)>>>(a, b, c, M, N, K);
     // hgemm_256x256x64_64x128_32x32_swz<<<dim3(M / 256, N / 256), dim3(64, 8)>>>(a, b, c, M, N, K);
     // hgemm_128x256x64_64x128_32x32_swz_db<<<dim3(M / 128, N / 256), dim3(64, 8)>>>(a, b, c, M, N, K);
+    // hgemm_256x128x64_64x128_32x32_swz_db<<<dim3(M / 256, N / 128), dim3(64, 8)>>>(a, b, c, M, N, K);
     hgemm_256x256x64_64x128_32x32_swz_db<<<dim3(M / 256, N / 256), dim3(64, 8)>>>(a, b, c, M, N, K);
     // hgemm_256x256x32_64x128_32x32_swz_2stage<<<dim3(M / 256, N / 256), dim3(64, 8)>>>(a, b, c, M, N, K); // not better than 256x256x64
     // hgemm_256x256x32_64x128_32x32_swz_3stage<<<dim3(M / 256, N / 256), dim3(64, 8)>>>(a, b, c, M, N, K); // worst...
